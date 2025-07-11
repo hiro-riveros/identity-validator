@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"go-idvalidator/internal/face"
 	"go-idvalidator/pkg/validator"
 	"log"
 )
@@ -26,12 +25,6 @@ func main() {
 	if frontDNIPath == "" || selfiePath == "" {
 		log.Fatal("ou must provide at least --front and --selfie")
 	}
-
-	recognizer, err := face.NewRecognizer("internal/face/models")
-	if err != nil {
-		log.Fatalf("Error loading face recognition models: %w", err)
-	}
-	defer recognizer.Close()
 
 	input := validator.Input{
 		FrontDNIPath: frontDNIPath,

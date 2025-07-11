@@ -8,7 +8,7 @@ import (
 
 var (
 	recognizer *face.Recognizer
-	secretKey  = []byte("AH3TAtrcRAy500VBqXqpwWxf2hdzlpqG")
+	secretKey  []byte
 	validator  *validation.Validation
 )
 

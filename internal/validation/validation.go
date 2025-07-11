@@ -3,6 +3,7 @@ package validation
 import (
 	"encoding/json"
 	"fmt"
+	"go-idvalidator/internal/config"
 	"go-idvalidator/internal/encryption"
 	"go-idvalidator/internal/face"
 	"go-idvalidator/internal/utils"
@@ -25,7 +26,7 @@ type Validation struct {
 func NewValidation(face *face.Recognizer, key []byte) *Validation {
 	return &Validation{
 		Face:      face,
-		SecretKey: key,
+		SecretKey: config.ResolveSecret(key),
 	}
 }
 
