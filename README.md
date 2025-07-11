@@ -56,6 +56,12 @@ Requisitos previos
 ```bash
 brew install tesseract
 ```
+* Instalar opencv:
+
+```bash
+brew upgrade opencv
+brew install opencv
+```
 * Instalar ffmpeg:
 ```bash
 brew install ffmpeg jpeg libpng libtiff
@@ -107,6 +113,7 @@ go run cmd/validate/main.go --front dni_front.jpg --back dni_back.jpg --video fa
 ```json
 {
   "match_percentage": 94.3,
+  "confidence_level": "high",
   "valid": true,
   "dni_text": {
     "name": "JUAN PEREZ",

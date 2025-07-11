@@ -33,3 +33,5 @@ go.work.sum
 # development temporary files
 /tmp
 /testdata/*
+
+.DS_Store

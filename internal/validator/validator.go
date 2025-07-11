@@ -14,8 +14,12 @@ type Validator struct {
 }
 
 type Result struct {
-	Distance float64 `json:"distance"`
-	Valid    bool    `json:"valid"`
+	Distance        float64 `json:"distance"`
+	Valid           bool    `json:"valid"`
+	MatchPercentage float64 `json:"match_percentage"`
+	ConfidenceLevel string  `json:"confidence_level"`
+	Reason          string  `json:"reason"`
+	DNIText         interface{}
 }
 
 func NewValidator(face *face.Recognizer, key []byte) *Validator {
@@ -51,18 +55,60 @@ func (validator *Validator) ValidateIdentity(dniFrontPath, selfiePath string) (s
 	}
 
 	dist := validator.Face.Compare(descDNI, descSelfie)
+	match := distanceToPercentage(dist)
+	confidence, valid, reason := translateScore(match)
+
 	result := Result{
-		Distance: dist,
-		Valid:    dist < 0.6,
+		MatchPercentage: match,
+		ConfidenceLevel: confidence,
+		Distance:        dist,
+		Valid:           valid,
+		Reason:          reason,
+		DNIText: struct {
+			Name     string "json:\"name\""
+			IDNumber string "json:\"idNumber\""
+		}{
+			Name:     "",
+			IDNumber: "",
+		},
 	}
 
-	jsonResult, _ := json.Marshal(result)
+	jsonResult, _ := json.MarshalIndent(result, "", " ")
 	encrypted, err := encryption.Encrypt(string(jsonResult), validator.SecretKey)
 	if err != nil {
 		return "", err
 	}
 
 	return encrypted, nil
+}
+
+func distanceToPercentage(dist float64) float64 {
+	minDist := 0.2
+	maxDist := 0.6
+
+	if dist <= minDist {
+		return 100.0
+	}
+
+	if dist >= maxDist {
+		return 0.0
+	}
+
+	score := ((maxDist - dist) / (maxDist - minDist) * 100)
+	return score
+}
+
+func translateScore(score float64) (string, bool, string) {
+	switch {
+	case score >= 90:
+		return "high", true, "High facial match. Features are broadly matched."
+	case score >= 75:
+		return "medium", true, "Acceptable match. Possible variation in illumination or angle."
+	case score >= 60:
+		return "low", false, "Low coincidence. Significant differences are detected."
+	default:
+		return "none", false, "Insufficient facial match"
+	}
 }
 
 func (validator *Validator) DecryptResult(encrypted string) (*Result, error) {
