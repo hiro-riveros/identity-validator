@@ -8,11 +8,6 @@ import (
 	"go-idvalidator/internal/utils"
 )
 
-type Validator struct {
-	Face      *face.Recognizer
-	SecretKey []byte
-}
-
 type Result struct {
 	Distance        float64 `json:"distance"`
 	Valid           bool    `json:"valid"`
@@ -22,14 +17,19 @@ type Result struct {
 	DNIText         interface{}
 }
 
-func NewValidator(face *face.Recognizer, key []byte) *Validator {
-	return &Validator{
+type Validation struct {
+	Face      *face.Recognizer
+	SecretKey []byte
+}
+
+func NewValidation(face *face.Recognizer, key []byte) *Validation {
+	return &Validation{
 		Face:      face,
 		SecretKey: key,
 	}
 }
 
-func (validator *Validator) ValidateIdentity(dniFrontPath, selfiePath string) (string, error) {
+func (validation *Validation) ValidateIdentity(dniFrontPath, selfiePath string) (string, error) {
 	dniJPG, err := utils.ConvertToSupportedFormat(dniFrontPath)
 	if err != nil {
 		return "", fmt.Errorf("DNI convert: %w", err)
@@ -40,12 +40,12 @@ func (validator *Validator) ValidateIdentity(dniFrontPath, selfiePath string) (s
 		return "", fmt.Errorf("DNI convert: %w", err)
 	}
 
-	descDNI, err := validator.Face.ExtractDescriptor(dniJPG)
+	descDNI, err := validation.Face.ExtractDescriptor(dniJPG)
 	if err != nil {
 		return "", fmt.Errorf("DNI image error: %w", err)
 	}
 
-	descSelfie, err := validator.Face.ExtractDescriptor(selfieJPG)
+	descSelfie, err := validation.Face.ExtractDescriptor(selfieJPG)
 	if err != nil {
 		return "", fmt.Errorf("selfie image error: %w", err)
 	}
@@ -54,7 +54,7 @@ func (validator *Validator) ValidateIdentity(dniFrontPath, selfiePath string) (s
 		return "", fmt.Errorf("one of the images has no valid face")
 	}
 
-	dist := validator.Face.Compare(descDNI, descSelfie)
+	dist := validation.Face.Compare(descDNI, descSelfie)
 	match := distanceToPercentage(dist)
 	confidence, valid, reason := translateScore(match)
 
@@ -74,12 +74,26 @@ func (validator *Validator) ValidateIdentity(dniFrontPath, selfiePath string) (s
 	}
 
 	jsonResult, _ := json.MarshalIndent(result, "", " ")
-	encrypted, err := encryption.Encrypt(string(jsonResult), validator.SecretKey)
+	encrypted, err := encryption.Encrypt(string(jsonResult), validation.SecretKey)
 	if err != nil {
 		return "", err
 	}
 
 	return encrypted, nil
+}
+
+func (validation *Validation) DecryptResult(encrypted string) (*Result, error) {
+	decrypted, err := encryption.Decrypt(encrypted, validation.SecretKey)
+	if err != nil {
+		return nil, fmt.Errorf("error while decrypting result: %w", err)
+	}
+
+	var result Result
+	if err := json.Unmarshal([]byte(decrypted), &result); err != nil {
+		return nil, fmt.Errorf("error while parsing result: %w", err)
+	}
+
+	return &result, nil
 }
 
 func distanceToPercentage(dist float64) float64 {
@@ -109,18 +123,4 @@ func translateScore(score float64) (string, bool, string) {
 	default:
 		return "none", false, "Insufficient facial match"
 	}
-}
-
-func (validator *Validator) DecryptResult(encrypted string) (*Result, error) {
-	decrypted, err := encryption.Decrypt(encrypted, validator.SecretKey)
-	if err != nil {
-		return nil, fmt.Errorf("error while decrypting result: %w", err)
-	}
-
-	var result Result
-	if err := json.Unmarshal([]byte(decrypted), &result); err != nil {
-		return nil, fmt.Errorf("error while parsing result: %w", err)
-	}
-
-	return &result, nil
 }

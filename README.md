@@ -106,7 +106,12 @@ fmt.Printf("Resultado: %+v\n", result)
 
 Desde CLI
 ```bash
-go run cmd/validate/main.go --front dni_front.jpg --back dni_back.jpg --video face_video.mp4
+go run cmd/main.go \
+  --front testdata/dni_front_1.png \
+  --back testdata/dni_back.jpg \
+  --video testdata/face_video.mp4 \
+  --selfie testdata/selfie_0.png
+
 ```
 
 # 📤 Respuesta esperada
@@ -125,11 +130,10 @@ go run cmd/validate/main.go --front dni_front.jpg --back dni_back.jpg --video fa
 
 # 🧪 Roadmap inicial
 - [x] OCR de cara frontal del DNI
-- [x] Extracción de frame facial del video
 - [x] Matching facial con go-face
+- [x] Persistencia encriptada de resultados
+- [ ] Extracción de frame facial del video
 - [ ] Validación de estructura de DNI
-- [ ] Persistencia opcional encriptada de resultados
-- [ ] Integración futura con servicios externos
 
 # 🔐 Seguridad
 Los datos procesados se consideran sensibles. En futuras versiones se incluirá:
