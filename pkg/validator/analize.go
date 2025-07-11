@@ -22,12 +22,16 @@ func init() {
 	validator = validation.NewValidation(recognizer, secretKey)
 }
 
-func Analize(input Input) (*Result, error) {
+func Analize(input Input) (string, error) {
 	encrypted, err := validator.ValidateIdentity(input.FrontDNIPath, input.SelfiePath)
 	if err != nil {
-		return nil, fmt.Errorf("validation error: %w", err)
+		return "", fmt.Errorf("validation error: %w", err)
 	}
 
+	return encrypted, nil
+}
+
+func DecryptAnalysis(encrypted string) (*Result, error) {
 	response, err := validator.DecryptResult(encrypted)
 	if err != nil {
 		return nil, fmt.Errorf("decryption error: %w", err)

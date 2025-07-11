@@ -33,9 +33,14 @@ func main() {
 		SelfiePath:   selfiePath,
 	}
 
-	result, err := validator.Analize(input)
+	encrypted, err := validator.Analize(input)
 	if err != nil {
 		log.Fatalf("Error in identity analysis: %v", err)
+	}
+
+	result, err := validator.DecryptAnalysis(encrypted)
+	if err != nil {
+		log.Fatalf("Error in decrypting: %v", err)
 	}
 
 	fmt.Printf("✅ Resultado:\n")

@@ -34,7 +34,6 @@ identity-validator/
 ├── go.mod
 ├── go.sum
 ├── README.md
-├── main.go
 ├── cmd/
 │   ├── demo/
 │   │   └── main.go          # Ejecutable para realizar pruebas
@@ -107,9 +106,14 @@ input := validator.Input{
   VideoPath:    "testdata/face_video.mp4",
 }
 
-result, err := validator.Analyze(input)
+encrypted, err := validator.Analyze(input)
 if err != nil {
   log.Fatal(err)
+}
+
+result, err := validator.DecryptAnalysis(encrypted)
+if err != nil {
+  log.Fatalf("Error in decrypting: %v", err)
 }
 
 fmt.Printf("Resultado: %+v\n", result)
@@ -154,4 +158,4 @@ Los datos procesados se consideran sensibles. En futuras versiones se incluirá:
 * TTL de almacenamiento temporal
 
 # 📄 Licencia
-MIT
+go-identity-validator is licensed under [CC0](LICENSE).
