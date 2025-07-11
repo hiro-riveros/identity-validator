@@ -24,7 +24,7 @@ Y entregue como salida:
 # 🧱 Tecnologías utilizadas
 Go 1.21+
 
-* Tesseract OCR para extraer texto del DNI
+<!-- * Tesseract OCR para extraer texto del DNI -->
 * go-face para análisis facial (bindings de Dlib)
 * ffmpeg para extracción de frames desde el video
 * Go image libraries para procesamiento
@@ -35,14 +35,26 @@ identity-validator/
 ├── go.sum
 ├── README.md
 ├── main.go
-├── internal/
+├── cmd/
+│   ├── demo/
+│   │   └── main.go          # Ejecutable para realizar pruebas
+│   └── main.go              # Ejecutable para el CLI
+├── pkg/
 │   ├── validator/
-│   │   ├── validator.go       # Punto de entrada del análisis
-│   │   ├── face_match.go      # Lógica para comparación facial
-│   │   ├── dni_parser.go      # OCR y parsing del DNI
-│   │   └── types.go           # Definición de structs: Input, Resultado, etc.
+│   │   ├── analize.go       # Punto de entrada del análisis
+│   │   └── types.go         # Definición de tipos Input/Result
+├── internal/
+│   ├── validation/
+│   │   └── validation.go    # funcioenes base para el analisis
+│   └── face/
+│   │   ├── recognizer.go    # Comparacion de imagenes
+│   │   └── models/          # Modelos descargados pre entrenados para el analisis
 │   └── utils/
-│       └── crypto.go          # Funciones para encriptar los datos validados
+│   │   └── convertor.go     # Funciones para transformar png to jpg/jpeg
+│   └── encryption/
+│   │   └── encrypt.go       # Funciones para encriptar / desencriptar
+│   └── config/
+│       └── config.go        # Funciones para cargar secrets
 └── testdata/
     ├── sample_front_dni.jpg
     ├── sample_back_dni.jpg
@@ -51,9 +63,9 @@ identity-validator/
 
 # 📥 Instalación
 Requisitos previos
-* Instalar Tesseract:
+<!-- * Instalar Tesseract: -->
 
-```bash
+<!-- ```bash
 brew install tesseract
 ```
 * Instalar opencv:
@@ -61,7 +73,7 @@ brew install tesseract
 ```bash
 brew upgrade opencv
 brew install opencv
-```
+``` -->
 * Instalar ffmpeg:
 ```bash
 brew install ffmpeg jpeg libpng libtiff
